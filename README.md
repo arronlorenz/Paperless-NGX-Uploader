@@ -1,40 +1,63 @@
 # Paperless-NGX-Uploader
-Helper container to upload docs and pdfs to Paperless-NGX via API.
 
+Helper container to upload PDFs to Paperless-NGX using its REST API.
 
-4 Deploy steps in Synology Container Manager
-File Station → Shared Folder
+## Environment variables
 
-Create /doclinks/apiuploader to hold the upload state database.
+| Variable | Purpose |
+|----------|--------------------------------------------------------------------------|
+| `PAPERLESS_URL` | Base URL of your Paperless-NGX instance, e.g. `http://paperless.lan:8000` |
+| `PAPERLESS_TOKEN` | API token created in Paperless. Required. |
+| `SOURCE_DIRS` | Semicolon separated list of directories to scan for `*.pdf`. |
+| `STATE_DB` | Path to the SQLite database that tracks uploaded files. |
+| `MIN_AGE` | Seconds to wait after file modification time before upload (default `60`). |
+| `SCAN_INTERVAL` | Seconds between directory scans (default `300`). |
+| `TZ` | Optional timezone for logs. |
 
-Container Manager → Projects → Create
+## Build
 
-Paste the YAML above.
+```bash
+docker build -t paperless-api-uploader .
+```
 
-Replace PAPERLESS_URL and PAPERLESS_TOKEN.
+## Run
 
-Click Next → Deploy.
+```bash
+docker run \
+  -e PAPERLESS_URL=http://paperless.lan:8000 \
+  -e PAPERLESS_TOKEN=YOURTOKEN \
+  -e SOURCE_DIRS="/nas/sharepoint;/nas/p21sftp" \
+  -v /volume1/doclinks/sharepoint:/nas/sharepoint:ro \
+  -v /volume1/doclinks/p21sftp:/nas/p21sftp:ro \
+  -v /volume1/doclinks/apiuploader:/state \
+  paperless-api-uploader
+```
 
-Watch the logs
-Container Manager → Containers → paperless-api-uploader → Logs.
-You should see lines like
+## Example output
 
-bash
-Copy
-Edit
+```
 [OK] /nas/sharepoint/Invoice_123.pdf
 [OK] /nas/p21sftp/PO_456.pdf
+```
 Each file is uploaded once; later scans skip it silently.
 
-5 Need tags or metadata?
-The Paperless API lets you pass extra form fields (title=, document_type=, tags=…).
-Add them in the requests.post() call inside uploader.py, e.g.:
+## Adding metadata fields
 
-python
-Copy
-Edit
+The Paperless API accepts extra form data such as `title`, `document_type` or
+`tags`. Add them in the `requests.post()` call inside `uploader.py` as shown
+below (lines 31‑40 of the original README):
+
+```python
 r = requests.post(
     URL, headers=headers,
     files={"document": (pdf.name, fp, "application/pdf")},
     data={"document_type": 7, "tags": [16, 42]}
 )
+```
+
+## Deploy steps in Synology Container Manager
+
+1. Create `/doclinks/apiuploader` in File Station to hold the upload state database.
+2. In Container Manager → Projects → Create, paste the contents of `compose.yaml`.
+3. Replace `PAPERLESS_URL` and `PAPERLESS_TOKEN` with your values.
+4. Click **Next** → **Deploy** and monitor the logs.
