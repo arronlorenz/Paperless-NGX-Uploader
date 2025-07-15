@@ -20,6 +20,13 @@ Helper container to upload PDFs to Paperless-NGX using its REST API.
 docker build -t paperless-api-uploader .
 ```
 
+When using Synology's Container Manager, you usually do **not** need to run the
+command above manually. The `compose.yaml` contains a `build` directive and
+Container Manager automatically builds the image when you deploy the project.
+Make sure the entire repository (including this `README.md`, `compose.yaml` and
+the `Dockerfile`) resides in a folder on your NAS so that Container Manager has
+access to the build context.
+
 ## Run
 
 ```bash
@@ -61,6 +68,12 @@ r = requests.post(
 ## Deploy steps in Synology Container Manager
 
 1. Create `/doclinks/apiuploader` in File Station to hold the upload state database.
-2. In Container Manager → Projects → Create, paste the contents of `compose.yaml`.
-3. Replace `PAPERLESS_URL` and `PAPERLESS_TOKEN` with your values.
-4. Click **Next** → **Deploy** and monitor the logs.
+2. Clone or copy this repository to a folder on the NAS so that `compose.yaml`
+   and the Dockerfile are available.
+3. In Container Manager → Projects → Create, select the `compose.yaml` file
+   from that folder.
+4. Replace `PAPERLESS_URL` and `PAPERLESS_TOKEN` with your values.
+5. Click **Next** → **Deploy**.
+6. The first deployment will build the image automatically; subsequent
+   deployments reuse the built image. Monitor the logs to ensure the build
+   completes successfully.
