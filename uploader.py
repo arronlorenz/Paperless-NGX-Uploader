@@ -37,6 +37,7 @@ while True:
                         URL,
                         headers=headers,
                         files={"document": (pdf.name, fp, "application/pdf")},
+                        timeout=30,
                     )
                 r.raise_for_status()
                 cur.execute("INSERT INTO done VALUES(?,?,?)",
