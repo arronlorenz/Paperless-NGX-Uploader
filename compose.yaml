@@ -2,7 +2,8 @@ version: "3.9"
 
 services:
   paperless-api-uploader:
-    image: python:3.12-slim                 # light base + Python
+    build: .                                # build image from Dockerfile
+    image: paperless-api-uploader
     container_name: paperless-api-uploader
     restart: unless-stopped
     user: "1000:1000"                       # <- use the UID/GID paperless runs as
@@ -24,6 +25,4 @@ services:
 
       # Same folder again, but exposed at /app so we can keep the script alongside the DB
       - /volume1/doclinks/apiuploader:/app
-    entrypoint: >
-      sh -c "pip install --quiet --no-cache-dir requests &&
-             python /app/uploader.py"
+    entrypoint: ["python", "/app/uploader.py"]
