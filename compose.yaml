@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  paperless-api-uploader:
+    image: python:3.12-slim                 # light base + Python
+    container_name: paperless-api-uploader
+    restart: unless-stopped
+    user: "1000:1000"                       # <- use the UID/GID paperless runs as
+    environment:
+      TZ: America/Chicago
+      PAPERLESS_URL:  "http://paperless.lan:8000"   # ← update if different
+      PAPERLESS_TOKEN: "PUT-YOUR-TOKEN-HERE"        # ← generate in Paperless UI
+      MIN_AGE: "60"            # wait 60 s after mtime before upload
+      SCAN_INTERVAL: "300"     # scan every 5 min
+      SOURCE_DIRS: "/nas/sharepoint;/nas/p21sftp"
+      STATE_DB: "/state/uploaded.db"
+    volumes:
+      # *** READ-ONLY *** mounts of your original files
+      - /volume1/doclinks/sharepoint:/nas/sharepoint:ro
+      - /volume1/doclinks/p21sftp:/nas/p21sftp:ro
+
+      # Folder that stores the tiny SQLite “already-uploaded” DB
+      - /volume1/doclinks/apiuploader:/state
+
+      # Same folder again, but exposed at /app so we can keep the script alongside the DB
+      - /volume1/doclinks/apiuploader:/app
+    entrypoint: >
+      sh -c "pip install --quiet --no-cache-dir requests &&
+             python /app/uploader.py"
