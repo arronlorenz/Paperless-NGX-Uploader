@@ -1,7 +1,14 @@
 import os, time, pathlib, sqlite3, requests, sys
 
-URL   = os.getenv("PAPERLESS_URL").rstrip("/") + "/api/documents/post_document/"
-TOKEN = os.getenv("PAPERLESS_TOKEN")
+url_env   = os.getenv("PAPERLESS_URL")
+token_env = os.getenv("PAPERLESS_TOKEN")
+missing = [name for name, val in (("PAPERLESS_URL", url_env), ("PAPERLESS_TOKEN", token_env)) if not val]
+if missing:
+    print(f"Error: Missing required environment variable(s): {', '.join(missing)}", file=sys.stderr)
+    sys.exit(1)
+
+URL   = url_env.rstrip("/") + "/api/documents/post_document/"
+TOKEN = token_env
 MIN   = int(os.getenv("MIN_AGE", "60"))
 STEP  = int(os.getenv("SCAN_INTERVAL", "300"))
 DB    = os.getenv("STATE_DB", "/state/uploaded.db")
