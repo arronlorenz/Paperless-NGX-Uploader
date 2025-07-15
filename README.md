@@ -9,7 +9,7 @@ Helper container to upload PDFs to Paperless-NGX using its REST API.
 | `PAPERLESS_URL` | Base URL of your Paperless-NGX instance, e.g. `http://paperless.lan:8000` |
 | `PAPERLESS_TOKEN` | API token created in Paperless. Required. |
 | `SOURCE_DIRS` | Semicolon separated list of directories to scan for `*.pdf`. |
-| `STATE_DB` | Path to the SQLite database that tracks uploaded files. |
+| `STATE_DB` | Path to the SQLite database that tracks uploaded files and their hashes. |
 | `MIN_AGE` | Seconds to wait after file modification time before upload (default `60`). |
 | `SCAN_INTERVAL` | Seconds between directory scans (default `300`). |
 | `TZ` | Optional timezone for logs. |
@@ -40,6 +40,9 @@ docker run \
 [OK] /nas/p21sftp/PO_456.pdf
 ```
 Each file is uploaded once; later scans skip it silently.
+The uploader also stores a SHA-256 hash for each document in the state
+database so that modified files are re-uploaded even if their size and
+timestamp are unchanged.
 
 ## Adding metadata fields
 
