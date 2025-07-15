@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   paperless-api-uploader:
-    build: .                                # build image from Dockerfile
+    build: .                                # Build custom image once
     image: paperless-api-uploader
     container_name: paperless-api-uploader
     restart: unless-stopped
@@ -22,7 +22,4 @@ services:
 
       # Folder that stores the tiny SQLite “already-uploaded” DB
       - /volume1/doclinks/apiuploader:/state
-
-      # Same folder again, but exposed at /app so we can keep the script alongside the DB
-      - /volume1/doclinks/apiuploader:/app
-    entrypoint: ["python", "/app/uploader.py"]
+    # entrypoint provided by the Docker image

@@ -5,9 +5,7 @@ Helper container to upload docs and pdfs to Paperless-NGX via API.
 4 Deploy steps in Synology Container Manager
 File Station → Shared Folder
 
-Create /doclinks/apiuploader.
-
-Drop uploader.py inside it.
+Create /doclinks/apiuploader to hold the upload state database.
 
 Container Manager → Projects → Create
 
